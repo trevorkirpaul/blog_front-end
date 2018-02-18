@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import { connect } from 'react-redux';
+import { fetchBlogPosts } from '../../actions/blogs';
 
-export default class Home extends Component {
+export class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -10,10 +11,15 @@ export default class Home extends Component {
     };
   }
   componentDidMount() {
-    axios
-      .get('http://localhost:3000/blogs')
-      .then(({ data }) => this.setState({ blogs: [...data] }))
-      .catch(() => this.setState({ error: true }));
+    this.props.fetchBlogPosts();
+  }
+  componentWillReceiveProps(nextProps) {
+    const blog = nextProps.blog;
+
+    if (blog.posts.length > 0) {
+      const blogs = blog.posts;
+      this.setState({ blogs });
+    }
   }
   render() {
     const { blogs } = this.state;
@@ -27,3 +33,13 @@ export default class Home extends Component {
     );
   }
 }
+
+const mapStateToProps = state => ({
+  blog: state.blog,
+});
+
+const mapDisptachToProps = dispatch => ({
+  fetchBlogPosts: () => dispatch(fetchBlogPosts()),
+});
+
+export default connect(mapStateToProps, mapDisptachToProps)(Home);
